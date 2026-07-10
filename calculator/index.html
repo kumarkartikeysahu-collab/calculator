@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator — Swiss Modern</title>
+    <link rel="stylesheet" href="/src/index.css" />
+  </head>
+  <body class="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col justify-between p-4 md:p-6 select-none font-sans">
+    
+    <!-- Decorative top header -->
+    <header class="max-w-md w-full mx-auto flex items-center justify-between mb-2 px-1" id="app-header">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-zinc-950 flex items-center justify-center text-white shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2" /><line x1="8" x2="16" y1="6" y2="6" /><line x1="16" x2="16" y1="14" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" /></svg>
+        </div>
+        <div>
+          <h1 class="font-display font-bold text-sm tracking-wide text-zinc-800 uppercase">Calculator</h1>
+          <p class="text-[10px] font-mono text-zinc-400">Swiss Modern v1.1</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <button 
+          id="btn-keyboard-legend"
+          class="p-2 rounded-lg transition-all border bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 cursor-pointer"
+          title="Keyboard Shortcuts"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-keyboard"><rect width="20" height="12" x="2" y="6" rx="2" /><path d="M6 10h.01" /><path d="M10 10h.01" /><path d="M14 10h.01" /><path d="M18 10h.01" /><path d="M6 14h.01" /><path d="M18 14h.01" /><path d="M10 14h8" /></svg>
+        </button>
+        
+        <button 
+          id="btn-history-toggle"
+          class="p-2 rounded-lg transition-all border bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 cursor-pointer relative"
+          title="Calculation History"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></svg>
+          <span id="history-badge" class="hidden absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-500"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Container Card -->
+    <main class="max-w-md w-full mx-auto relative flex-1 flex flex-col justify-center my-4" id="calculator-card-container">
+      <div class="bg-white rounded-3xl border border-zinc-200 shadow-2xl shadow-zinc-200/60 overflow-hidden flex flex-col relative w-full aspect-[4/5] min-h-[520px]" id="calculator-body">
+        
+        <!-- History Drawer Overlay -->
+        <div 
+          id="history-drawer"
+          class="hidden absolute inset-x-0 top-0 h-2/3 bg-zinc-50/95 backdrop-blur-md border-b border-zinc-200 z-30 flex flex-col p-4 shadow-lg transition-all duration-150 transform -translate-y-2 opacity-0"
+        >
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-zinc-200/80">
+            <span class="text-xs font-display font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></svg>
+              Calculation History
+            </span>
+            <button 
+              id="btn-clear-history"
+              class="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1 py-1 px-2 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+              Clear
+            </button>
+          </div>
+
+          <!-- History items stack -->
+          <div id="history-items-container" class="flex-1 overflow-y-auto space-y-3 pr-1">
+            <!-- Injected by JS -->
+          </div>
+
+          <button 
+            id="btn-close-history"
+            class="w-full mt-2 py-2 bg-zinc-200 hover:bg-zinc-300 text-zinc-700 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1 cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+            Collapse Drawer
+          </button>
+        </div>
+
+        <!-- Screen / Display Area -->
+        <div class="bg-gradient-to-b from-zinc-50 to-zinc-100/50 p-6 flex flex-col justify-end border-b border-zinc-100 flex-1 min-h-[140px] relative" id="calculator-screen">
+          
+          <!-- Top Indicator Info -->
+          <div class="absolute top-4 left-6 flex items-center gap-1.5 text-[10px] font-semibold tracking-wider text-zinc-400 uppercase">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Real-Time Engine</span>
+          </div>
+
+          <!-- Scrolling formula input -->
+          <div class="w-full overflow-x-auto overflow-y-hidden text-right whitespace-nowrap mb-2 no-scrollbar py-1">
+            <div class="inline-block min-w-full">
+              <span class="font-mono text-xl md:text-2xl text-zinc-400 tracking-normal break-all select-all font-light" id="calc-display-expression">0</span>
+              <div id="display-scroll-anchor"></div>
+            </div>
+          </div>
+
+          <!-- Large Evaluated Result Display / Error Display -->
+          <div class="text-right min-h-[44px] flex items-end justify-end overflow-hidden" id="calc-display-results">
+            <span id="calc-display-output" class="text-zinc-300 font-display text-2xl font-light">&nbsp;</span>
+          </div>
+        </div>
+
+        <!-- Interactive Keyboard/Button Grid -->
+        <div class="p-5 bg-white grid grid-cols-4 gap-3.5" id="calculator-buttons-grid">
+          <!-- Row 1 -->
+          <button
+            id="key-clear"
+            data-key-labels='["escape", "c"]'
+            class="h-12 md:h-14 rounded-2xl flex flex-col items-center justify-center font-display font-semibold text-sm transition-all border shadow-2xs bg-orange-50/70 border-orange-100/50 text-orange-600 hover:bg-orange-100 hover:border-orange-200 cursor-pointer"
+            title="Clear (Esc / C)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw mb-0.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+            <span class="text-[10px] tracking-wider font-mono">AC</span>
+          </button>
+
+          <button
+            id="key-toggle-sign"
+            data-key-labels='["s", "_"]'
+            class="h-12 md:h-14 rounded-2xl flex flex-col items-center justify-center font-display font-medium text-sm transition-all border shadow-2xs bg-zinc-100/80 border-zinc-200 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 cursor-pointer"
+            title="Toggle Positive/Negative (S / _)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right-left mb-0.5"><path d="m16 3 4 4-4 4" /><path d="M20 7H9" /><path d="m8 21-4-4 4-4" /><path d="M4 17h11" /></svg>
+            <span class="text-[9px] tracking-wider font-mono">+/-</span>
+          </button>
+
+          <button
+            id="key-percent"
+            data-key-labels='["%"]'
+            class="h-12 md:h-14 rounded-2xl flex flex-col items-center justify-center font-display font-semibold text-sm transition-all border shadow-2xs bg-zinc-100/80 border-zinc-200 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 cursor-pointer"
+            title="Percentage (%)"
+          >
+            <span class="font-display text-base">%</span>
+            <span class="text-[8px] uppercase tracking-widest text-zinc-400">pct</span>
+          </button>
+
+          <button
+            id="key-backspace"
+            data-key-labels='["backspace"]'
+            class="h-12 md:h-14 rounded-2xl flex flex-col items-center justify-center font-display font-semibold text-sm transition-all border shadow-2xs bg-zinc-100/80 border-zinc-200 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 cursor-pointer"
+            title="Backspace (Backspace)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-delete mb-0.5"><path d="M10 9H8" /><path d="M14 9h-2" /><path d="M14 13h-2" /><path d="M10 13H8" /><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /></svg>
+            <span class="text-[8px] uppercase tracking-widest text-zinc-400">del</span>
+          </button>
+
+          <!-- Row 2 -->
+          <button
+            id="key-7"
+            data-key-labels='["7"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            7
+          </button>
+          <button
+            id="key-8"
+            data-key-labels='["8"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            8
+          </button>
+          <button
+            id="key-9"
+            data-key-labels='["9"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            9
+          </button>
+          <button
+            id="key-divide"
+            data-key-labels='["/"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-bold text-xl transition-all border shadow-2xs bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800 cursor-pointer"
+          >
+            ÷
+          </button>
+
+          <!-- Row 3 -->
+          <button
+            id="key-4"
+            data-key-labels='["4"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            4
+          </button>
+          <button
+            id="key-5"
+            data-key-labels='["5"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            5
+          </button>
+          <button
+            id="key-6"
+            data-key-labels='["6"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            6
+          </button>
+          <button
+            id="key-multiply"
+            data-key-labels='["*"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-bold text-xl transition-all border shadow-2xs bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800 cursor-pointer"
+          >
+            ×
+          </button>
+
+          <!-- Row 4 -->
+          <button
+            id="key-1"
+            data-key-labels='["1"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            1
+          </button>
+          <button
+            id="key-2"
+            data-key-labels='["2"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            2
+          </button>
+          <button
+            id="key-3"
+            data-key-labels='["3"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            3
+          </button>
+          <button
+            id="key-subtract"
+            data-key-labels='["-"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-bold text-xl transition-all border shadow-2xs bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800 cursor-pointer"
+          >
+            −
+          </button>
+
+          <!-- Row 5 -->
+          <button
+            id="key-0"
+            data-key-labels='["0"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            0
+          </button>
+          <button
+            id="key-decimal"
+            data-key-labels='["."]'
+            class="h-12 md:h-14 rounded-2xl font-display font-semibold text-lg transition-all border shadow-2xs bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 cursor-pointer"
+          >
+            .
+          </button>
+          <button
+            id="key-equals"
+            data-key-labels='["enter", "="]'
+            class="h-12 md:h-14 rounded-2xl font-display font-bold text-xl transition-all border shadow-2xs bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-500 cursor-pointer animate-pulse"
+          >
+            =
+          </button>
+          <button
+            id="key-add"
+            data-key-labels='["+"]'
+            class="h-12 md:h-14 rounded-2xl font-display font-bold text-xl transition-all border shadow-2xs bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800 cursor-pointer"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Slide-out / Collapsible Keyboard Shortcuts Legend -->
+    <div 
+      id="shortcuts-legend-card"
+      class="hidden max-w-md w-full mx-auto bg-white border border-zinc-200 rounded-2xl p-4 shadow-xl mb-4 transform transition-all duration-150 scale-95 opacity-0"
+    >
+      <div class="flex items-center gap-2 text-zinc-700 font-semibold text-xs uppercase tracking-wider mb-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-keyboard text-zinc-500"><rect width="20" height="12" x="2" y="6" rx="2" /><path d="M6 10h.01" /><path d="M10 10h.01" /><path d="M14 10h.01" /><path d="M18 10h.01" /><path d="M6 14h.01" /><path d="M18 14h.01" /><path d="M10 14h8" /></svg>
+        Keyboard Shortcuts Map
+      </div>
+      <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+        <div class="flex justify-between border-b border-zinc-100 py-1 font-mono text-[11px]">
+          <span class="text-zinc-500">0 - 9 / .</span>
+          <span class="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800 font-semibold">Numbers</span>
+        </div>
+        <div class="flex justify-between border-b border-zinc-100 py-1 font-mono text-[11px]">
+          <span class="text-zinc-500">+ / -</span>
+          <span class="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800 font-semibold">+ / −</span>
+        </div>
+        <div class="flex justify-between border-b border-zinc-100 py-1 font-mono text-[11px]">
+          <span class="text-zinc-500">* / /</span>
+          <span class="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800 font-semibold">× / ÷</span>
+        </div>
+        <div class="flex justify-between border-b border-zinc-100 py-1 font-mono text-[11px]">
+          <span class="text-zinc-500">Enter / =</span>
+          <span class="bg-zinc-100 px-1.5 py-0.5 rounded text-emerald-700 font-semibold">Calculate</span>
+        </div>
+        <div class="flex justify-between border-b border-zinc-100 py-1 font-mono text-[11px]">
+          <span class="text-zinc-500">Backspace</span>
+          <span class="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800 font-semibold">Delete</span>
+        </div>
+        <div class="flex justify-between border-b border-zinc-100 py-1 font-mono text-[11px]">
+          <span class="text-zinc-500">Esc / C</span>
+          <span class="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800 font-semibold">Clear</span>
+        </div>
+        <div class="flex justify-between border-b border-zinc-100 py-1 font-mono text-[11px]">
+          <span class="text-zinc-500">%</span>
+          <span class="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800 font-semibold">Percent</span>
+        </div>
+        <div class="flex justify-between border-b border-zinc-100 py-1 font-mono text-[11px]">
+          <span class="text-zinc-500">S / _</span>
+          <span class="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-800 font-semibold">Negate (+/-)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decorative footer -->
+    <footer class="max-w-md w-full mx-auto text-center mt-2" id="app-footer">
+      <p class="text-[10px] font-mono text-zinc-400 tracking-wider font-semibold">
+        TACTILE VANILLA ENGINE • SWISS MODERNIST DESIGN
+      </p>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
